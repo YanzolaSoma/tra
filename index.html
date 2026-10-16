@@ -1,0 +1,700 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quiz da Defesa Civil</title>
+
+<style>
+:root {
+  --orange: #d96318;
+  --navy: #101827;
+  --lime: #c5ff35;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  background: var(--navy);
+  color: white;
+  min-height: 100vh;
+}
+
+button {
+  font: inherit;
+  cursor: pointer;
+}
+
+.screen {
+  display: none;
+  min-height: 100vh;
+}
+
+.screen.active { display: flex; }
+
+/* MENU */
+#menu {
+  align-items: center;
+  justify-content: center;
+  background:
+    linear-gradient(#07111a99, #07111acc),
+    url('https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgN-G9ZoTMqwXmvhKljwSp73jiGXGbqDX2F5dxWsOYOc7-FcZfS2z52izv6F9K5Z8m_3yE-5hTa5uQSFVaiOf60oXK7X3KUS39oiJxmIrnYzJl4GveFSWQNhQWZAq7bkoplR1vbaOyuvGKSvCjPfODHMsTZsPrgNYb4KXaPl2EzTwei1PzM_WlYavXhe0Y/s1600/PERGUNTA%20%284%29.png')
+    center/cover;
+  padding: 24px;
+}
+
+.menu-card {
+  width: min(100%, 900px);
+  text-align: center;
+  background: white;
+  border: 9px solid #ff7928;
+  color: var(--orange);
+  padding: clamp(20px, 5vw, 54px);
+  box-shadow: 0 15px 45px #0008;
+}
+
+.menu-card h1 {
+  font-size: clamp(2rem, 7vw, 5rem);
+  margin: 0 0 12px;
+  font-weight: 900;
+}
+
+.menu-card p {
+  color: #293344;
+  font-size: 1.2rem;
+  margin-bottom: 26px;
+}
+
+.primary {
+  border: 0;
+  background: var(--orange);
+  color: white;
+  font-weight: 900;
+  padding: 16px 38px;
+  font-size: 1.25rem;
+  letter-spacing: 1px;
+  box-shadow: 0 5px 0 #9c3e0a;
+}
+
+/* JOGO */
+#game {
+  background:
+    linear-gradient(#07111a55, #07111acc),
+    url('https://mid-noticias.curitiba.pr.gov.br/2026/00582914.jpg')
+    center/cover fixed;
+  padding: 18px;
+  align-items: center;
+  justify-content: center;
+}
+
+.game-wrap {
+  width: min(100%, 1500px);
+  min-height: min(92vh, 900px);
+  display: grid;
+  grid-template-columns: minmax(230px, 34%) 1fr;
+  gap: 18px;
+}
+
+.character-panel {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  background: #121a28;
+  border: 5px solid var(--orange);
+  min-height: 380px;
+}
+
+.character-panel .character {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  position: absolute;
+  inset: 0;
+}
+
+.mouth {
+  position: absolute;
+  width: clamp(22px, 4vw, 48px);
+  height: auto;
+  left: 49%;
+  top: 33%;
+  transform: translate(-50%, -50%);
+  display: none;
+  pointer-events: none;
+}
+
+.mouth.speaking { display: block; }
+
+.panel-label {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  right: 12px;
+  background: #101827dd;
+  border-left: 5px solid var(--lime);
+  padding: 10px;
+  font-weight: bold;
+  text-align: center;
+}
+
+.question-panel {
+  background: white;
+  color: var(--orange);
+  border: 9px solid var(--orange);
+  padding: clamp(18px, 3vw, 42px);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+}
+
+.topline {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+  color: #263447;
+  font-weight: bold;
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+}
+
+.timer {
+  color: #b64000;
+  font-variant-numeric: tabular-nums;
+}
+
+.question-title {
+  text-align: center;
+  font-size: clamp(1.7rem, 4vw, 3.4rem);
+  font-weight: 900;
+  margin: 12px 0 28px;
+  line-height: 1.15;
+}
+
+.answers {
+  display: grid;
+  gap: 14px;
+}
+
+.answer {
+  background: white;
+  border: 4px solid var(--orange);
+  color: var(--orange);
+  font-weight: 900;
+  text-align: left;
+  padding: 15px 18px;
+  font-size: clamp(1rem, 2.2vw, 1.5rem);
+}
+
+.answer:hover:not(:disabled) {
+  background: #fff0e6;
+}
+
+.answer:disabled {
+  cursor: default;
+  opacity: .85;
+}
+
+.answer.correct {
+  background: #dfffc2;
+  border-color: #4c9217;
+  color: #245a00;
+}
+
+.answer.wrong {
+  background: #ffe1d9;
+  border-color: #b42318;
+  color: #8d170f;
+}
+
+.feedback {
+  min-height: 28px;
+  text-align: center;
+  font-weight: bold;
+  color: #263447;
+  margin-top: 14px;
+}
+
+/* GAME OVER E VITÓRIA */
+#end-screen {
+  position: relative;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 24px;
+  background: #080b12;
+  overflow: hidden;
+}
+
+.end-gif {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: .72;
+}
+
+.end-content {
+  position: relative;
+  z-index: 1;
+  text-shadow: 0 4px 14px black;
+  font-weight: 900;
+}
+
+.end-content h1 {
+  font-size: clamp(3rem, 10vw, 8rem);
+  margin: 0 0 28px;
+  letter-spacing: 2px;
+}
+
+#end-screen.win .end-content h1 { color: #d8ff70; }
+#end-screen.lose .end-content h1 { color: #ff673e; }
+
+@media (max-width: 760px) {
+  .game-wrap {
+    grid-template-columns: 1fr;
+    min-height: unset;
+  }
+
+  .character-panel {
+    height: 34vh;
+    min-height: 230px;
+  }
+
+  .character-panel .character {
+    object-position: center 28%;
+  }
+
+  .mouth {
+    top: 34%;
+    left: 49%;
+  }
+
+  .question-panel { min-height: 55vh; }
+  .question-title { margin: 6px 0 18px; }
+  .answers { gap: 9px; }
+  .answer { padding: 12px; }
+}
+</style>
+</head>
+
+<body>
+
+<!-- MENU PRINCIPAL -->
+<section id="menu" class="screen active">
+  <div class="menu-card">
+    <h1>QUIZ DA DEFESA CIVIL</h1>
+    <p>Responda corretamente às 10 perguntas e mostre que você sabe se proteger!</p>
+    <button class="primary" id="play-button">▶ JOGAR</button>
+  </div>
+</section>
+
+<!-- TELA DAS PERGUNTAS -->
+<section id="game" class="screen">
+  <div class="game-wrap">
+
+    <div class="character-panel">
+      <img
+        class="character"
+        src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgLrJ2ISrx_x37FHBavtmk2pbXj-hvNQRYSsAsEC8la8rx4W2EsjNeUxb4ZsI1I-hbKX0mFe1rLPBWtd24ML8tWeEWuAcPCQPPWZmj2okqz7eK-kV36QYqWeuGXSLmVUZX0WQDSuZ9ZhAq8vRLNAOFrGIAZEknbjivUwT82aAlGokaiZsMh-3r09jX_530/s1600/aberta.png"
+        alt="Personagem da Defesa Civil"
+      >
+
+      <img
+        class="mouth"
+        id="mouth"
+        src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEh0Nj6wTRlEHpF4F6gDIb8n8FA02pnywx-1HFmlvXCdWffpeYarnmh5aqy_vQC-48W9B8HsjhBAJKYL1rXt1ZIaYAvhFYpZE4SmsA2sr6tFcH7Uu8RE9XSTuDodhlLNn2KdkzFq2q-DXPVM55fpJdteYDR8LcxVM18Yi3G0K2YSymbbT9dfznm0kt1yQs4/s1600/boca.png"
+        alt=""
+      >
+
+      <div class="panel-label">DEFESA CIVIL • PARANÁ</div>
+    </div>
+
+    <div class="question-panel">
+      <div class="topline">
+        <span id="progress">PERGUNTA 1/10</span>
+        <span class="timer" id="timer">TEMPO: 367:00</span>
+      </div>
+
+      <div class="question-title" id="question">
+        Carregando pergunta...
+      </div>
+
+      <div class="answers" id="answers"></div>
+      <div class="feedback" id="feedback" aria-live="polite"></div>
+    </div>
+
+  </div>
+</section>
+
+<!-- RESULTADO -->
+<section id="end-screen" class="screen lose">
+  <img
+    class="end-gif"
+    id="end-gif"
+    alt=""
+    src="https://media1.tenor.com/m/26AH5wxG150AAAAC/reze-reze-chainsaw-man.gif"
+  >
+
+  <div class="end-content">
+    <h1 id="end-title">GAME OVER</h1>
+    <button class="primary" id="retry-button">TENTE NOVAMENTE</button>
+  </div>
+</section>
+
+<script>
+// PERGUNTAS E ALTERNATIVAS
+const questions = [
+  {
+    q: "Qual é a principal função da Defesa Civil?",
+    a: [
+      "Organizar eventos esportivos",
+      "Prevenir e reduzir riscos de desastres",
+      "Construir escolas",
+      "Fiscalizar lojas"
+    ],
+    correct: 1
+  },
+  {
+    q: "Qual destes desastres pode acontecer no Paraná?",
+    a: [
+      "Terremotos constantes",
+      "Erupções vulcânicas frequentes",
+      "Enchentes",
+      "Tsunamis frequentes"
+    ],
+    correct: 2
+  },
+  {
+    q: "Qual é o número de telefone da Defesa Civil no Brasil?",
+    a: ["190", "192", "193", "199"],
+    correct: 3
+  },
+  {
+    q: "O que devemos fazer ao receber um alerta de tempestade?",
+    a: [
+      "Ignorar o aviso",
+      "Seguir as orientações oficiais",
+      "Ir até o local de risco",
+      "Atravessar áreas alagadas"
+    ],
+    correct: 1
+  },
+  {
+    q: "Qual órgão coordena as ações de Defesa Civil no Paraná?",
+    a: [
+      "Coordenadoria Estadual da Defesa Civil",
+      "Secretaria de Turismo",
+      "Departamento de Trânsito",
+      "Secretaria de Esportes"
+    ],
+    correct: 0
+  },
+  {
+    q: "Qual destas situações pode causar uma enchente?",
+    a: [
+      "Falta de vento",
+      "Céu limpo",
+      "Chuvas intensas",
+      "Temperaturas amenas"
+    ],
+    correct: 2
+  },
+  {
+    q: "Qual é o principal objetivo dos alertas da Defesa Civil?",
+    a: [
+      "Divulgar eventos",
+      "Avisar sobre riscos e orientar a população",
+      "Anunciar produtos",
+      "Informar resultados esportivos"
+    ],
+    correct: 1
+  },
+  {
+    q: "O que devemos evitar durante uma enchente?",
+    a: [
+      "Acompanhar notícias oficiais",
+      "Procurar um local seguro",
+      "Seguir as orientações das autoridades",
+      "Atravessar ruas alagadas"
+    ],
+    correct: 3
+  },
+  {
+    q: "Como a população pode ajudar a Defesa Civil?",
+    a: [
+      "Espalhando boatos",
+      "Ignorando os alertas",
+      "Seguindo orientações e comunicando situações de risco",
+      "Entrando em áreas perigosas"
+    ],
+    correct: 2
+  },
+  {
+    q: "Qual destes fenômenos pode causar danos no Paraná?",
+    a: [
+      "Granizo",
+      "Apenas dias ensolarados",
+      "Brisas leves",
+      "Céu azul"
+    ],
+    correct: 0
+  }
+];
+
+// ELEMENTOS E VARIÁVEIS
+const screens = [...document.querySelectorAll(".screen")];
+const questionEl = document.getElementById("question");
+const answersEl = document.getElementById("answers");
+const progressEl = document.getElementById("progress");
+const timerEl = document.getElementById("timer");
+const feedbackEl = document.getElementById("feedback");
+const mouth = document.getElementById("mouth");
+const endScreen = document.getElementById("end-screen");
+const endTitle = document.getElementById("end-title");
+const endGif = document.getElementById("end-gif");
+
+const MOUTH_OPEN =
+  "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEh0Nj6wTRlEHpF4F6gDIb8n8FA02pnywx-1HFmlvXCdWffpeYarnmh5aqy_vQC-48W9B8HsjhBAJKYL1rXt1ZIaYAvhFYpZE4SmsA2sr6tFcH7Uu8RE9XSTuDodhlLNn2KdkzFq2q-DXPVM55fpJdteYDR8LcxVM18Yi3G0K2YSymbbT9dfznm0kt1yQs4/s1600/boca.png";
+
+const MOUTH_CLOSED =
+  "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgLrJ2ISrx_x37FHBavtmk2pbXj-hvNQRYSsASc8la8rx4W2EsjNeUxb4ZsI1I-hbKX0mFe1rLPBWtd24ML8tWeEWuAcPCQPPWZmj2okqz7eK-kV36QYqWeuGXSLmVUZX0WQDSuZ9ZhAq8vRLNAOFrGIAZEknbjivUwT82aAlGokaiZsMh-3r09jX_530/s1600/aberta.png";
+
+let current = 0;
+let seconds = 367 * 60;
+let countdown = null;
+let mouthInterval = null;
+let active = false;
+
+// MOSTRAR UMA TELA
+function showScreen(id) {
+  screens.forEach(screen => screen.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+}
+
+// CRONÔMETRO
+function updateTimer() {
+  const minutes = Math.floor(seconds / 60);
+  const secs = seconds % 60;
+
+  timerEl.textContent =
+    `TEMPO: ${String(minutes).padStart(3, "0")}:${String(secs).padStart(2, "0")}`;
+}
+
+function startTimer() {
+  clearInterval(countdown);
+
+  countdown = setInterval(() => {
+    if (!active) return;
+
+    seconds--;
+    updateTimer();
+
+    if (seconds <= 0) {
+      gameOver();
+    }
+  }, 1000);
+}
+
+// PARAR VOZ E ANIMAÇÃO
+function stopSpeech() {
+  if ("speechSynthesis" in window) {
+    window.speechSynthesis.cancel();
+  }
+
+  mouth.classList.remove("speaking");
+  clearInterval(mouthInterval);
+  mouth.src = MOUTH_CLOSED;
+}
+
+// VOZ ROBÓTICA DA PERSONAGEM
+function speakQuestion(text) {
+  stopSpeech();
+
+  if (!("speechSynthesis" in window)) return;
+
+  const utterance = new SpeechSynthesisUtterance(text);
+
+  utterance.lang = "pt-BR";
+  utterance.rate = 0.88;
+  utterance.pitch = 0.72;
+
+  const voices = window.speechSynthesis.getVoices();
+
+  const portugueseVoice =
+    voices.find(v => v.lang && v.lang.toLowerCase().startsWith("pt-br")) ||
+    voices.find(v => v.lang && v.lang.toLowerCase().startsWith("pt"));
+
+  if (portugueseVoice) {
+    utterance.voice = portugueseVoice;
+  }
+
+  utterance.onstart = () => {
+    mouth.classList.add("speaking");
+
+    mouthInterval = setInterval(() => {
+      mouth.src =
+        mouth.src.includes("boca.png")
+          ? MOUTH_CLOSED
+          : MOUTH_OPEN;
+    }, 140);
+  };
+
+  utterance.onend = () => {
+    mouth.classList.remove("speaking");
+    clearInterval(mouthInterval);
+    mouth.src = MOUTH_CLOSED;
+  };
+
+  window.speechSynthesis.speak(utterance);
+}
+
+// MOSTRAR PERGUNTA
+function renderQuestion() {
+  stopSpeech();
+
+  const item = questions[current];
+
+  progressEl.textContent =
+    `PERGUNTA ${current + 1}/${questions.length}`;
+
+  questionEl.textContent = item.q;
+  feedbackEl.textContent = "";
+  answersEl.innerHTML = "";
+
+  item.a.forEach((answer, i) => {
+    const button = document.createElement("button");
+
+    button.className = "answer";
+    button.textContent = `${"ABCD"[i]}) ${answer}`;
+
+    button.addEventListener("click", () => {
+      chooseAnswer(i, button);
+    });
+
+    answersEl.appendChild(button);
+  });
+
+  // A personagem lê somente a pergunta.
+  speakQuestion(item.q);
+}
+
+// VERIFICAR RESPOSTA
+function chooseAnswer(index, button) {
+  if (!active) return;
+
+  stopSpeech();
+
+  const item = questions[current];
+
+  [...answersEl.children].forEach(b => {
+    b.disabled = true;
+  });
+
+  if (index !== item.correct) {
+    button.classList.add("wrong");
+    feedbackEl.textContent = "Resposta incorreta!";
+
+    active = false;
+    setTimeout(gameOver, 700);
+    return;
+  }
+
+  button.classList.add("correct");
+  feedbackEl.textContent = "Resposta correta!";
+
+  current++;
+
+  if (current === questions.length) {
+    active = false;
+    clearInterval(countdown);
+    setTimeout(winGame, 700);
+  } else {
+    setTimeout(renderQuestion, 650);
+  }
+}
+
+// GAME OVER
+function gameOver() {
+  if (
+    !active &&
+    seconds > 0 &&
+    current < questions.length &&
+    feedbackEl.textContent !== "Resposta incorreta!" &&
+    !document.getElementById("game").classList.contains("active")
+  ) {
+    return;
+  }
+
+  active = false;
+  clearInterval(countdown);
+  stopSpeech();
+
+  endScreen.className = "screen active lose";
+  endTitle.textContent = "GAME OVER";
+
+  endGif.src =
+    "https://media1.tenor.com/m/26AH5wxG150AAAAC/reze-reze-chainsaw-man.gif";
+
+  document.getElementById("retry-button").textContent =
+    "TENTE NOVAMENTE";
+
+  showScreen("end-screen");
+}
+
+// VITÓRIA
+function winGame() {
+  clearInterval(countdown);
+  stopSpeech();
+
+  endScreen.className = "screen active win";
+  endTitle.textContent = "VOCÊ GANHOU";
+
+  endGif.src =
+    "https://media1.tenor.com/m/3Sykma8la9gAAAAd/reze-tongue-out-reze-chainsaw-man-moving-her-head.gif";
+
+  document.getElementById("retry-button").textContent =
+    "JOGAR DE NOVO";
+
+  showScreen("end-screen");
+}
+
+// INICIAR OU REINICIAR O JOGO
+function startGame() {
+  stopSpeech();
+
+  current = 0;
+  seconds = 367 * 60;
+  active = true;
+
+  updateTimer();
+  showScreen("game");
+  startTimer();
+  renderQuestion();
+}
+
+// BOTÕES
+document.getElementById("play-button")
+  .addEventListener("click", startGame);
+
+document.getElementById("retry-button")
+  .addEventListener("click", startGame);
+
+// ATUALIZAR QUANDO AS VOZES DO NAVEGADOR CARREGAREM
+if ("speechSynthesis" in window) {
+  window.speechSynthesis.onvoiceschanged = () => {};
+}
+
+updateTimer();
+</script>
+
+</body>
+</html>
